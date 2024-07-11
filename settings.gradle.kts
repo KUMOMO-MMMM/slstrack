@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "SLSTrack"
 include(":app")
 include(":TrackPlugin")
+include(":Tracker")
