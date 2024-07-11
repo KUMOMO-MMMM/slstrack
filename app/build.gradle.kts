@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.mq.sls.track"
+    namespace = "com.mq.sls.demo"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.mq.sls.track"
+        applicationId = "com.mq.sls.demo"
         minSdk = 21
         targetSdk = 34
         versionCode = 1
