@@ -32,4 +32,10 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.aliyun.log.android)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.gson)
+
+    compileOnly(libs.firebase.analytics.ktx)
+    compileOnly(libs.adjust.android)
 }
