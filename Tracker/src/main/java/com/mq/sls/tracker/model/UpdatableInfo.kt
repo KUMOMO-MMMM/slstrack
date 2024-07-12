@@ -4,7 +4,6 @@ import com.mq.sls.tracker.identifier.AdjustIdChecker
 import com.mq.sls.tracker.identifier.FirebaseIdChecker
 import com.mq.sls.tracker.identifier.GoogleAdIdChecker
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 
 class UpdatableInfo {
 
