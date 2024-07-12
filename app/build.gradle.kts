@@ -41,5 +41,6 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
-    implementation(project(":Tracker"))
+//    implementation(project(":Tracker"))
+    implementation("com.mq.sls.tracker:sls:0.0.1")
 }

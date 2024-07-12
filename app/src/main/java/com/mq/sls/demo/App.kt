@@ -1,7 +1,6 @@
 package com.mq.sls.demo
 
 import android.app.Application
-import android.net.Uri
 import android.util.Log
 import com.mq.sls.tracker.SLSReporter
 import com.mq.sls.tracker.model.LogConfig
@@ -18,6 +17,7 @@ class App: Application() {
         SLSReporter
             .build(this) {
                 isDebug = true
+                appName = "TrackerDemo"
                 flavor = "demo"
                 pingHost = "baidu.com"
                 getLogin = { "12345678" }

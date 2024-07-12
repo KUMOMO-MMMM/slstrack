@@ -1,6 +1,10 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    `maven-publish`
 }
 
 android {
@@ -38,4 +42,25 @@ dependencies {
 
     compileOnly(libs.firebase.analytics.ktx)
     compileOnly(libs.adjust.android)
+}
+
+val prop = Properties().apply {
+    load(FileInputStream(File(".", "gradle.properties")))
+}
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+    publications {
+        register<MavenPublication>("release") {
+            groupId = prop.getProperty("GROUP_ID")
+            artifactId = prop.getProperty("ARTIFACT_ID")
+            version = prop.getProperty("VERSION")
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }
