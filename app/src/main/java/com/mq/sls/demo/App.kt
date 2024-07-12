@@ -2,8 +2,8 @@ package com.mq.sls.demo
 
 import android.app.Application
 import android.util.Log
-import com.mq.sls.tracker.SLSReporter
-import com.mq.sls.tracker.model.LogConfig
+import com.mq.sls.log.SLSReporter
+import com.mq.sls.log.model.LogConfig
 import java.util.UUID
 
 class App: Application() {

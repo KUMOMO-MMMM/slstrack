@@ -33,9 +33,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     implementation(libs.aliyun.log.android)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.gson)
@@ -54,7 +51,7 @@ publishing {
     }
     publications {
         register<MavenPublication>("release") {
-            groupId = "com.mq.sls.tracker"
+            groupId = "com.mq.sls.log"
             version = "sls"
             artifactId = "0.0.1"
 
