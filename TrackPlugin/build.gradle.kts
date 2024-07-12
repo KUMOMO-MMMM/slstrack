@@ -1,6 +1,6 @@
 plugins {
     `kotlin-dsl`
-    `maven-publish`
+//    `maven-publish`
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_11
@@ -22,13 +22,13 @@ dependencies {
     implementation(libs.asm.util)
 }
 
-publishing {
-    repositories {
-        mavenLocal()
-    }
-    publications {
-        create<MavenPublication>("release") {
-            groupId = ""
-        }
-    }
-}
+//publishing {
+//    repositories {
+//        mavenLocal()
+//    }
+//    publications {
+//        create<MavenPublication>("release") {
+//            groupId = ""
+//        }
+//    }
+//}
