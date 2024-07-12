@@ -54,9 +54,9 @@ publishing {
     }
     publications {
         register<MavenPublication>("release") {
-            groupId = prop.getProperty("GROUP_ID")
-            artifactId = prop.getProperty("ARTIFACT_ID")
-            version = prop.getProperty("VERSION")
+            groupId = "com.mq.sls.tracker"
+            version = "sls"
+            artifactId = "0.0.1"
 
             afterEvaluate {
                 from(components["release"])
