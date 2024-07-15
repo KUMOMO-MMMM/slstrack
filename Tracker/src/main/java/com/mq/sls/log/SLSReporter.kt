@@ -66,7 +66,7 @@ class SLSReporter private constructor(private val builder: Builder) {
     private var logProducerClient: LogProducerClient? = null
 
     private var isInit = false
-    private var initFailed = false
+    private var isInitFailed = false
     private var isFetchingToken = false
     private val uuid = UUID.randomUUID()
     private val sessionId = uuid.toString()
@@ -85,16 +85,26 @@ class SLSReporter private constructor(private val builder: Builder) {
     private fun init(builder: Builder) {
         instance = this
         app = builder.application
-        logConfigManager.initConfig()
         updatableInfo = UpdatableInfo()
         initLogTask(app)
         checkOfflinePush()
-        getSLSConfig(true, {
-            init(app, it)
-        }, { _ ->
-            initFailed = true
-            release()
-        })
+        checkRefreshToken()
+    }
+
+    /**
+     * 目前 sdk 上报日志需要登录后的 token，所以需要外部监听登录事件之后再调用 token 检查
+     */
+    fun checkRefreshToken() {
+        if (getInitParam().isLogin) {
+            slsDebugLog("refresh token start")
+            logConfigManager.initConfig()
+            getSLSConfig(true, {
+                init(app, it)
+            }, { _ ->
+                isInitFailed = true
+                release()
+            })
+        }
     }
 
     private fun init(application: Application, slsLogBean: SLSLogConfig) {
@@ -221,7 +231,7 @@ class SLSReporter private constructor(private val builder: Builder) {
             val result = logProducerClient?.addLog(log)
             slsDebugLog("sls add log $result")
         } else {
-            if (initFailed) {
+            if (isInitFailed) {
                 return
             }
             pendingLogs += log
@@ -316,7 +326,7 @@ class SLSReporter private constructor(private val builder: Builder) {
 
     @OptIn(DelicateCoroutinesApi::class)
     fun report(key: String, params: Map<String, Any?>) {
-        if (initFailed) {
+        if (isInitFailed) {
             return
         }
         if (!needReport(key)) {

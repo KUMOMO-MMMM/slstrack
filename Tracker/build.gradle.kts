@@ -52,8 +52,8 @@ publishing {
     publications {
         register<MavenPublication>("release") {
             groupId = "com.mq.sls.log"
-            version = "sls"
-            artifactId = "0.0.1"
+            artifactId = "sls"
+            version = "0.0.4"
 
             afterEvaluate {
                 from(components["release"])
