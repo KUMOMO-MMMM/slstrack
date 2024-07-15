@@ -36,6 +36,10 @@ import java.util.*
 class SLSReporter private constructor(private val builder: Builder) {
     companion object {
 
+        private const val STATE_UN_INIT = -1
+        private const val STATE_LOG_ENABLE = 0
+        private const val STATE_LOG_DISABLE = 1
+
         const val TAG = "SLSReporter"
 
         inline fun build(application: Application, block: (Builder.() -> Unit)) = Builder(application).apply(block).build()
@@ -56,17 +60,18 @@ class SLSReporter private constructor(private val builder: Builder) {
     }
 
     fun init() {
-        if (isInit) {
+        if (firstInit) {
             return
         }
         init(builder)
-        isInit = true
+        firstInit = true
     }
 
     private var logProducerClient: LogProducerClient? = null
 
-    private var isInit = false
-    private var isInitFailed = false
+
+    private var firstInit = false
+    private var logState = STATE_UN_INIT
     private var isFetchingToken = false
     private val uuid = UUID.randomUUID()
     private val sessionId = uuid.toString()
@@ -95,15 +100,12 @@ class SLSReporter private constructor(private val builder: Builder) {
      * 目前 sdk 上报日志需要登录后的 token，所以需要外部监听登录事件之后再调用 token 检查
      */
     fun checkRefreshToken() {
-        if (getInitParam().isLogin) {
+        if (getInitParam().isLogin && logState == STATE_UN_INIT) {
             slsDebugLog("refresh token start")
             logConfigManager.initConfig()
-            getSLSConfig(true, {
+            getSLSConfig {
                 init(app, it)
-            }, { _ ->
-                isInitFailed = true
-                release()
-            })
+            }
         }
     }
 
@@ -143,14 +145,10 @@ class SLSReporter private constructor(private val builder: Builder) {
                 }
                 slsDebugLog("sls callback rc: $resultCode," + "msg: $errorMessage," + "pResult=${producerResult.name}")
                 if (producerResult == LogProducerResult.LOG_PRODUCER_SEND_UNAUTHORIZED) {
-                    getSLSConfig(false, {
+                    getSLSConfig {
                         slsDebugLog("sls resetToken success")
                         config.resetSecurityToken(it.accessKeyId, it.accessKeySecret, it.securityToken)
-                    }, { disable ->
-                        if (disable) {
-                            release()
-                        }
-                    })
+                    }
                 } else {
                     httpReport(
                         ReportEvent.FAIL_REPORT_EVENT, mutableMapOf(
@@ -197,17 +195,17 @@ class SLSReporter private constructor(private val builder: Builder) {
      * 统计 sls 相关报错
      */
     private fun httpReport(id: String, value: MutableMap<String, Any?>) {
+        slsDebugLog("HttpReport:$id, values:$value")
         builder.errorCallback(id, value)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun getSLSConfig(isInit: Boolean, success: (SLSLogConfig) -> Unit, failed: (Boolean) -> Unit) {
+    private fun getSLSConfig(success: (SLSLogConfig) -> Unit) {
         if (isFetchingToken) {
             return
         }
         isFetchingToken = true
         val exceptionHandler = CoroutineExceptionHandler { context, e ->
-            failed(isInit)
             isFetchingToken = false
             slsDebugLog("exception occurred in ${context[CoroutineName]}], $e")
         }
@@ -215,27 +213,33 @@ class SLSReporter private constructor(private val builder: Builder) {
             val slsLog: SLSLogConfig? = builder.getSLSLogConfig()
             isFetchingToken = false
             slsLog?.let {
-                if (!it.enabled) {
-                    failed(true)
-                    return@let
+                if (it.enabled) {
+                    logState = STATE_LOG_ENABLE
+                    success(slsLog)
+                } else {
+                    logState = STATE_LOG_DISABLE
+                    release()
                 }
-                success(slsLog)
-            } ?: run {
-                failed(isInit)
             }
         }
     }
 
     private fun report(log: Log) {
-        if (logProducerClient != null) {
-            val result = logProducerClient?.addLog(log)
-            slsDebugLog("sls add log $result")
-        } else {
-            if (isInitFailed) {
-                return
+        when (logState) {
+            STATE_UN_INIT -> {
+                if (pendingLogs.size > 1000) {
+                    return
+                }
+                pendingLogs += log
+                slsDebugLog("pending log: ${pendingLogs.size}")
             }
-            pendingLogs += log
-            slsDebugLog("pending log: ${pendingLogs.size}")
+            STATE_LOG_ENABLE -> {
+                if (logProducerClient != null) {
+                    val result = logProducerClient?.addLog(log)
+                    slsDebugLog("sls add log $result")
+                }
+            }
+            else -> { return }
         }
     }
 
@@ -243,6 +247,7 @@ class SLSReporter private constructor(private val builder: Builder) {
      * 释放
      */
     private fun release() {
+        slsDebugLog("release SLSReporter")
         tasks.forEach { it.release() }
         tasks.clear()
         pendingLogs.clear()
@@ -326,9 +331,6 @@ class SLSReporter private constructor(private val builder: Builder) {
 
     @OptIn(DelicateCoroutinesApi::class)
     fun report(key: String, params: Map<String, Any?>) {
-        if (isInitFailed) {
-            return
-        }
         if (!needReport(key)) {
             slsDebugLog("ignore report: $key, params: $params")
             return
