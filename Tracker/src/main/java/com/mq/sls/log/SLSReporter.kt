@@ -127,9 +127,14 @@ class SLSReporter private constructor(private val builder: Builder) {
             if (!logDir.exists()) {
                 logDir.mkdirs()
             }
+            /**
+             * 1表示开启断点续传功能，0表示关闭。默认值为0
+             */
             config.setPersistent(1)
             config.setPersistentFilePath(logDir.path + "/log.dat")
+            // 持久化文件滚动个数，建议设置为10
             config.setPersistentMaxFileCount(10)
+            // 每个持久化文件的大小，单位为Byte，格式为N*1024*1024。建议N的取值范围为1~10
             config.setPersistentMaxFileSize(1024 * 1024)
             config.setPersistentMaxLogCount(65536)
             config.setCallbackFromSenderThread(false)
