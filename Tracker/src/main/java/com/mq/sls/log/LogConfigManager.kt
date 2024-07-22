@@ -2,6 +2,8 @@ package com.mq.sls.log
 
 import com.mq.sls.log.model.LogConfigItem
 import com.mq.sls.log.utils.SLSSpUtils
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -13,21 +15,26 @@ class LogConfigManager(private val sessionHash: Int) {
 
     @OptIn(DelicateCoroutinesApi::class)
     fun initConfig() {
-        GlobalScope.launch {
-            val config = SLSSpUtils.getConfig()
-            try {
-                val data = SLSReporter.instance.getInitParam().getLogConfig()
-                SLSReporter.slsDebugLog("data: $data" )
-                val configList = if (data == null || data.version.isEmpty()) {
-                    config
-                } else {
-                    SLSSpUtils.saveLogConfig(data)
-                    data.eventConfigList
-                }
-                updateEventMap(configList)
-            } catch (e: Exception) {
-                updateEventMap(config)
+        val exceptionHandler = CoroutineExceptionHandler { context, e ->
+            checkLocalConfig()
+            SLSReporter.slsDebugLog("exception occurred in ${context[CoroutineName]}], $e")
+        }
+        GlobalScope.launch(context = exceptionHandler) {
+            val data = SLSReporter.instance.getInitParam().getLogConfig()
+            SLSReporter.slsDebugLog("data: $data")
+            if (data == null || data.version.isEmpty()) {
+                checkLocalConfig()
+            } else {
+                SLSSpUtils.saveLogConfig(data)
+                updateEventMap(data.eventConfigList)
             }
+        }
+    }
+
+    private fun checkLocalConfig() {
+        val config = SLSSpUtils.getConfig()
+        if (config.isNotEmpty()) {
+            updateEventMap(config)
         }
     }
 
