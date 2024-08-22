@@ -25,7 +25,7 @@ class FirebaseIdChecker : BaseIdChecker() {
         }
         firebase.appInstanceId.addOnCompleteListener {
             SLSReporter.slsDebugLog("Firebase.addOnCompleteListener() called with: callback = ${it.result}")
-            callback(it.result)
+            callback(it.result ?: "")
         }
         return true
     }
