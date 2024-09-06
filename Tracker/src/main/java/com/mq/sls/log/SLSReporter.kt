@@ -36,6 +36,7 @@ import java.util.*
 class SLSReporter private constructor(private val builder: Builder) {
     companion object {
 
+        private const val MAX_ERROR_REPORT_COUNT = 3
         private const val STATE_UN_INIT = -1
         private const val STATE_LOG_ENABLE = 0
         private const val STATE_LOG_DISABLE = 1
@@ -57,6 +58,8 @@ class SLSReporter private constructor(private val builder: Builder) {
         fun report(key: String, params: Map<String, Any?>) {
             instance.report(key, params)
         }
+
+        private var errorReportCount = 0
     }
 
     fun init() {
@@ -155,6 +158,11 @@ class SLSReporter private constructor(private val builder: Builder) {
                         config.resetSecurityToken(it.accessKeyId, it.accessKeySecret, it.securityToken)
                     }
                 } else {
+                    if (errorReportCount >= MAX_ERROR_REPORT_COUNT) {
+                        // wocute 遇到一个问题，后台不断上报，停不下来
+                        return@LogProducerClient
+                    }
+                    errorReportCount++
                     httpReport(
                         ReportEvent.FAIL_REPORT_EVENT, mutableMapOf(
                             ReportKey.NAME to producerResult.name,
