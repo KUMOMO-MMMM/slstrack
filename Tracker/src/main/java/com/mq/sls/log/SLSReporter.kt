@@ -389,7 +389,11 @@ class SLSReporter private constructor(private val builder: Builder) {
 
         val isLogin: Boolean
             get() {
-                return !(getLogin().isNullOrEmpty())
+                return try {
+                    !getLogin().isNullOrEmpty()
+                } catch (e: Exception) {
+                    false
+                }
             }
 
         fun build() = SLSReporter(this)
