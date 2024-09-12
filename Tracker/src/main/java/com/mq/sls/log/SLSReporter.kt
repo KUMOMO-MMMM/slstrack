@@ -74,6 +74,7 @@ class SLSReporter private constructor(private val builder: Builder) {
 
 
     private var firstInit = false
+    @Volatile
     private var logState = STATE_UN_INIT
     private var isFetchingToken = false
     private val uuid = UUID.randomUUID()
@@ -179,13 +180,15 @@ class SLSReporter private constructor(private val builder: Builder) {
     }
 
     private fun checkPendingLog() {
-        if (pendingLogs.isEmpty()) {
-            return
+        synchronized(pendingLogs) {
+            if (pendingLogs.isEmpty()) {
+                return
+            }
+            pendingLogs.forEach {
+                report(it)
+            }
+            pendingLogs.clear()
         }
-        pendingLogs.forEach {
-            report(it)
-        }
-        pendingLogs.clear()
     }
 
     private fun getAppLogDirectory(): File {
@@ -240,11 +243,13 @@ class SLSReporter private constructor(private val builder: Builder) {
     private fun report(log: Log) {
         when (logState) {
             STATE_UN_INIT -> {
-                if (pendingLogs.size > 1000) {
-                    return
+                synchronized(pendingLogs) {
+                    if (pendingLogs.size > 1000) {
+                        return
+                    }
+                    pendingLogs += log
+                    slsDebugLog("pending log: ${pendingLogs.size}")
                 }
-                pendingLogs += log
-                slsDebugLog("pending log: ${pendingLogs.size}")
             }
             STATE_LOG_ENABLE -> {
                 if (logProducerClient != null) {
@@ -263,7 +268,9 @@ class SLSReporter private constructor(private val builder: Builder) {
         slsDebugLog("release SLSReporter")
         tasks.forEach { it.release() }
         tasks.clear()
-        pendingLogs.clear()
+        synchronized(pendingLogs){
+            pendingLogs.clear()
+        }
         logProducerClient = null
     }
 
