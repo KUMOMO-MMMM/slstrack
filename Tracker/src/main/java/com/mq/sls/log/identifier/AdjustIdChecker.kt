@@ -1,6 +1,7 @@
 package com.mq.sls.log.identifier
 
 import com.adjust.sdk.Adjust
+import com.adjust.sdk.OnAdidReadListener
 import com.mq.sls.log.SLSReporter
 
 class AdjustIdChecker : BaseIdChecker() {
@@ -18,8 +19,7 @@ class AdjustIdChecker : BaseIdChecker() {
         SLSReporter.slsDebugLog("AdjustId.checkIdentifier() isEnable: ${isEnable()}")
         if (super.checkIdentifier(callback))
             return true
-        val adId = Adjust.getAdid()
-        callback(adId ?: "")
+        val adId = Adjust.getAdid { adId -> callback(adId ?: "") }
         SLSReporter.slsDebugLog("AdjustId.adId = $adId")
         return true
     }

@@ -24,7 +24,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 aliyun-log-android = { group = "com.aliyun.openservices", name = "aliyun-log-android-sdk", version.ref = "aliyun-log"}
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlin-coroutines-android"}
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx", version.ref = "firebase-analytics-ktx" }
-adjust-android = { group = "com.adjust.sdk", name = "adjust-android", version = "4.38.0" }
+adjust-android = { group = "com.adjust.sdk", name = "adjust-android", version = "5.0.2" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson"}
 
 [plugins]
