@@ -100,7 +100,11 @@ fun Application.getVersionName(): String {
  * @return
  */
 fun Any.toJSON(): String {
-    return Gson().toJson(this)
+    return try {
+         Gson().toJson(this)
+    } catch (e: Exception) {
+        """{"classInstance": "${this::class.java.canonicalName}", "exception": "${e.message}"}"""
+    }
 }
 
 fun String.parseJSON2Map(): Map<String, Any> {
