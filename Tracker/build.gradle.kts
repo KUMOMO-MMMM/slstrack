@@ -39,6 +39,7 @@ dependencies {
 
     compileOnly(libs.firebase.analytics.ktx)
     compileOnly(libs.adjust.android)
+    compileOnly(libs.af.android)
 }
 
 val prop = Properties().apply {

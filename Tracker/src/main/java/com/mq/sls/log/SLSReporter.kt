@@ -379,7 +379,9 @@ class SLSReporter private constructor(private val builder: Builder) {
         var appName: String = ""
         var getLogin: () -> String? = { "" }
         var getDeviceId: () -> String = { "" }
+        @Deprecated(message = "use getMediaSource() instead")
         var getAdjustFrom: () -> String = { "" }
+        var getMediaSource: () -> String = { "" }
         var getServerTime: () -> Long = { 0L }
         var getLocalLanguage: () -> String? = { "" }
         var errorCallback: (String, Map<String, Any?>) -> Unit =

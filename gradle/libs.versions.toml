@@ -25,6 +25,7 @@ aliyun-log-android = { group = "com.aliyun.openservices", name = "aliyun-log-and
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlin-coroutines-android"}
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx", version.ref = "firebase-analytics-ktx" }
 adjust-android = { group = "com.adjust.sdk", name = "adjust-android", version = "5.0.2" }
+af-android = { group = "com.appsflyer", name="af-android-sdk", version = "6.16.0"}
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson"}
 
 [plugins]

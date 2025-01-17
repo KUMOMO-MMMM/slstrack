@@ -47,7 +47,10 @@ class PublicDeviceInfoLogTask : BaseLogTask() {
 
     private suspend fun registerUpdate() {
         val updatableInfo = SLSReporter.instance.updatableInfo ?: return
-        combine(updatableInfo.googleAdIdFlow, updatableInfo.adjustIdFlow, updatableInfo.userPseudoIdFlow) { values ->
+        combine(updatableInfo.googleAdIdFlow,
+            updatableInfo.adjustIdFlow,
+            updatableInfo.userPseudoIdFlow,
+            updatableInfo.afIdFlow) { values ->
             values
         }.distinctUntilChanged()
             .collect { combineValue ->
@@ -81,14 +84,18 @@ class PublicDeviceInfoLogTask : BaseLogTask() {
                 }"),
                 "app_channel" to SLSReporter.instance.getFlavor(),
                 "app_local_path" to SLSReporter.instance.getApp().packageCodePath,
-                "media_source" to getAdjustFrom(),
+                "media_source" to getMediaSource(),
                 "report_amount" to reportCount.getAndIncrement()
             )
         )
     }
 
-    private fun getAdjustFrom(): String {
-        return SLSReporter.instance.getInitParam().getAdjustFrom()
+    private fun getMediaSource(): String {
+        var mediaSource = SLSReporter.instance.getInitParam().getMediaSource()
+        if (mediaSource.isEmpty()) {
+            mediaSource = SLSReporter.instance.getInitParam().getAdjustFrom()
+        }
+        return mediaSource
     }
 
     private fun getAllDeviceId(): String {
@@ -97,10 +104,11 @@ class PublicDeviceInfoLogTask : BaseLogTask() {
         val googleAdvertisingId = updatableInfo.googleAdIdFlow.value
         val adjustId = updatableInfo.adjustIdFlow.value
         val userPseudoId = updatableInfo.userPseudoIdFlow.value
+        val afId = updatableInfo.afIdFlow.value
         return AllDeviceId(
             googleAdvertisingId,
             SLSReporter.instance.getInitParam().getDeviceId(),
-            adjustId, userPseudoId
+            adjustId, userPseudoId, afId
         ).toJSON()
     }
 }

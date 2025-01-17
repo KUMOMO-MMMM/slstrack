@@ -14,5 +14,7 @@ data class AllDeviceId(
     @SerializedName("adjust_id")
     var adjustId: String? = null,
     @SerializedName("user_pseudo_id")
-    var userPseudoId: String? = null
+    var userPseudoId: String? = null,
+    @SerializedName("af_id")
+    var afId: String? = null
 )
