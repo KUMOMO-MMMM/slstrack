@@ -49,8 +49,7 @@ class PublicDeviceInfoLogTask : BaseLogTask() {
         val updatableInfo = SLSReporter.instance.updatableInfo ?: return
         combine(updatableInfo.googleAdIdFlow,
             updatableInfo.adjustIdFlow,
-            updatableInfo.userPseudoIdFlow,
-            updatableInfo.afIdFlow) { values ->
+            updatableInfo.userPseudoIdFlow) { values ->
             values
         }.distinctUntilChanged()
             .collect { combineValue ->

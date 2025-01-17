@@ -15,7 +15,7 @@ class AFAdIdChecker: BaseIdChecker() {
     }
 
     override fun checkIdentifier(callback: (String) -> Unit): Boolean {
-        SLSReporter.slsDebugLog("AdjustId.checkIdentifier() isEnable: ${isEnable()}")
+        SLSReporter.slsDebugLog("AFAdIdChecker.checkIdentifier() isEnable: ${isEnable()}")
         if (super.checkIdentifier(callback))
             return true
         val afAdId = AppsFlyerLib.getInstance().getAppsFlyerUID(SLSReporter.instance.getApp())
